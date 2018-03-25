@@ -36,10 +36,9 @@ func hashTwoBytes(left, right []byte) []byte {
 }
 
 type ProofTreeNode struct {
-	Hash   []byte
-	Parent *ProofTreeNode
-	Left   *ProofTreeNode
-	Right  *ProofTreeNode
+	Hash  []byte
+	Left  *ProofTreeNode
+	Right *ProofTreeNode
 }
 
 func (ptn *ProofTreeNode) IsLeaf() bool {
@@ -112,15 +111,13 @@ func GenMkRootAndProof(datas [][]byte) ([]byte, *ProofTreeNode) {
 		return nil, nil
 	case 1:
 		hash := hashBytes(datas[0])
-		proofNode := ProofTreeNode{hash, nil, nil, nil}
+		proofNode := ProofTreeNode{hash, nil, nil}
 		return hash, &proofNode
 	default:
 		leftHash, lproof := GenMkRootAndProof(datas[:(len(datas)+1)/2])
 		rightHash, rproof := GenMkRootAndProof(datas[(len(datas)+1)/2:])
 		hash := hashTwoBytes(leftHash, rightHash)
-		root := ProofTreeNode{hash, nil, lproof, rproof}
-		lproof.Parent = &root
-		rproof.Parent = &root
+		root := ProofTreeNode{hash, lproof, rproof}
 		return hash, &root
 	}
 }
