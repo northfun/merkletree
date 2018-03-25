@@ -6,5 +6,8 @@
 ### find proof path of oriData from proof tree
 `func (ptn *ProofTreeNode) FindProofPath(oriData []byte) [][]byte`
 
+### generate root hash by proof path and oriData
+`func OfflineRootCalc(path [][]byte, oriData []byte) []byte `
+
 ### compare merkle root to make sure oriData in the tree 
 `func CheckMkData(root []byte, path [][]byte, oriData []byte) bool`

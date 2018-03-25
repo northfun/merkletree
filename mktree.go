@@ -104,19 +104,19 @@ func _printProofTree(root *ProofTreeNode, ent string) string {
 	return ret
 }
 
-// GenMkRootAndProof generates the merkle tree of parameter arr,
+// GenMkRootAndProof generates the merkle tree of parameter datas,
 // it returns the root hash code and the root node of the proof tree.
-func GenMkRootAndProof(arr [][]byte) ([]byte, *ProofTreeNode) {
-	switch len(arr) {
+func GenMkRootAndProof(datas [][]byte) ([]byte, *ProofTreeNode) {
+	switch len(datas) {
 	case 0:
 		return nil, nil
 	case 1:
-		hash := hashBytes(arr[0])
+		hash := hashBytes(datas[0])
 		proofNode := ProofTreeNode{hash, nil, nil, nil}
 		return hash, &proofNode
 	default:
-		leftHash, lproof := GenMkRootAndProof(arr[:(len(arr)+1)/2])
-		rightHash, rproof := GenMkRootAndProof(arr[(len(arr)+1)/2:])
+		leftHash, lproof := GenMkRootAndProof(datas[:(len(datas)+1)/2])
+		rightHash, rproof := GenMkRootAndProof(datas[(len(datas)+1)/2:])
 		hash := hashTwoBytes(leftHash, rightHash)
 		root := ProofTreeNode{hash, nil, lproof, rproof}
 		lproof.Parent = &root
@@ -125,11 +125,11 @@ func GenMkRootAndProof(arr [][]byte) ([]byte, *ProofTreeNode) {
 	}
 }
 
-// CheckMkData checks whether oriData hashed with merkle path equal to root hash
-func CheckMkData(root []byte, path [][]byte, oriData []byte) bool {
+// OfflineRootCalc calculates the root hash by proof path and oriData
+func OfflineRootCalc(path [][]byte, oriData []byte) []byte {
 	hashData := hashBytes(oriData)
 	if len(path) == 0 {
-		return bytes.Equal(root, hashData)
+		return hashData
 	}
 	tmpRoot := make([]byte, len(hashData))
 	copy(tmpRoot, hashData)
@@ -141,5 +141,11 @@ func CheckMkData(root []byte, path [][]byte, oriData []byte) bool {
 			tmpRoot = hashTwoBytes(tmpRoot, path[i][1:])
 		}
 	}
+	return tmpRoot
+}
+
+// CheckMkData checks whether oriData hashed with merkle path equal to root hash
+func CheckMkData(root []byte, path [][]byte, oriData []byte) bool {
+	tmpRoot := OfflineRootCalc(path, oriData)
 	return bytes.Equal(tmpRoot, root)
 }
